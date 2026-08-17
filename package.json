@@ -10,11 +10,12 @@
   },
   "scripts": {
     "build": "node scripts/build-index.mjs",
+    "yomi:update": "node scripts/build-yomi.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "oxlint scripts tests",
-    "lint:fix": "oxlint --fix scripts tests",
+    "lint": "oxlint scripts tests public",
+    "lint:fix": "oxlint --fix scripts tests public",
     "format": "oxfmt",
     "format:check": "oxfmt --check"
   },

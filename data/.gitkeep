@@ -1,0 +1,4 @@
+読みの対応表(語と読みの組)の置き場。入力(recipes/)でも公開物(public/)でもない中間物を置く。
+
+yomi.generated.json  自動生成。npm run yomi:update でまるごと書き直す。手で編集しない
+yomi.overrides.json  著者が誤読を訂正する。生成処理は読み書きしない

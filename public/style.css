@@ -1,0 +1,215 @@
+/* スマホで、調理中に片手で使うことを前提にする。
+   タップ領域は 44px 以上、文字は濡れた手でも読める大きさを取る。
+   フレームワークは使わない(config.yaml の常設制約)。 */
+
+:root {
+  --bg: #fbfaf7;
+  --surface: #ffffff;
+  --text: #1f2321;
+  --muted: #6b716d;
+  --line: #e3e0d8;
+  --accent: #3d6b4f;
+  --tap: 44px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181a;
+    --surface: #212528;
+    --text: #e9ece9;
+    --muted: #a3aaa5;
+    --line: #333a3d;
+    --accent: #8fc7a4;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Hiragino Sans',
+    'Noto Sans JP',
+    sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* 検索欄は常に手の届く場所に置く。スクロールしても消えない */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.header__title {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.search {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 1.05rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.search:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.main {
+  padding: 12px 16px 40px;
+}
+
+.status:not(:empty) {
+  margin: 8px 2px 16px;
+  color: var(--muted);
+}
+
+.results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  min-height: calc(var(--tap) + 12px);
+  padding: 12px 16px;
+  font-size: 1.1rem;
+  color: inherit;
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 詳細。スマホではほぼ全画面になる */
+/* display は指定しない。
+   dialog は閉じているあいだ UA スタイルの display:none で隠れる。ここで display を
+   書くとそれを上書きしてしまい、閉じても表示されたままになる。
+   開いているときだけ flex にする(下の [open])。 */
+.detail {
+  flex-direction: column;
+  width: min(680px, 100vw);
+  max-width: 100%;
+  max-height: 100dvh;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  color: var(--text);
+  background: var(--surface);
+  border: none;
+  border-radius: 14px;
+}
+
+.detail[open] {
+  display: flex;
+}
+
+.detail::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+
+/* バーはスクロール領域の外に置く。
+   sticky にしてスクロール領域の中に入れると、ダイアログを開いたときの
+   フォーカス移動でバーの高さぶんスクロールが行き過ぎ、料理名が隠れることがある。 */
+.detail__bar {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.detail__close {
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 0 16px;
+  font: inherit;
+  color: var(--accent);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+/* スクロールするのはここだけ */
+.detail__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px 20px 32px;
+  overscroll-behavior: contain;
+  /* 中身を差し替えたときにブラウザが見た目の位置を保とうとしてスクロールを戻すため、
+     切っておく。別のレシピに切り替えたら必ず先頭から読ませたい */
+  overflow-anchor: none;
+}
+
+.detail__title {
+  margin: 0 0 20px;
+  font-size: 1.4rem;
+}
+
+.detail__section + .detail__section {
+  margin-top: 24px;
+}
+
+/* 区画の見出しは4つとも同じ重みにする。
+   「調理方法」「材料」は画面側のラベル、「手順」「メモ」は本文(Markdown)の見出しで
+   出どころが違うが、読む側にとっては同じ並びの区切りなので見た目を揃える。 */
+.detail__heading,
+.detail__steps h2,
+.detail__steps h3 {
+  margin: 0 0 10px;
+  padding-bottom: 5px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 2px solid var(--accent);
+}
+
+/* 本文の見出しは流れの途中に現れるので、前の内容との間隔を取る */
+.detail__steps h2,
+.detail__steps h3 {
+  margin-top: 26px;
+}
+
+.detail__steps > :first-child {
+  margin-top: 0;
+}
+
+.detail__list {
+  margin: 0;
+  padding-left: 1.3em;
+}
+
+.detail__steps ol,
+.detail__steps ul {
+  padding-left: 1.3em;
+}

@@ -42,7 +42,7 @@ function toEntries(pairs) {
 }
 
 describe('検索インデックスの正規化（不変条件）', () => {
-  it('有効なレシピからは不備が出ず、常に決められた8キーを持つ', () => {
+  it('有効なレシピからは不備が出ず、常に決められた12キーを持つ', () => {
     fc.assert(
       fc.property(recipeEntries, (pairs) => {
         const { recipes, issues } = buildRecipes(toEntries(pairs));
@@ -62,9 +62,20 @@ describe('検索インデックスの正規化（不変条件）', () => {
         const { recipes } = buildRecipes(toEntries(pairs));
 
         for (const recipe of recipes) {
-          for (const key of ['auto_key', 'menu_no', 'manual_note', 'body', 'body_html']) {
+          for (const key of [
+            'auto_key',
+            'menu_no',
+            'manual_note',
+            'body',
+            'body_html',
+            'title_yomi',
+            'auto_key_yomi',
+            'manual_note_yomi',
+          ]) {
             expect(typeof recipe[key]).toBe('string');
           }
+          // 材料の読みは材料と要素数・順序で対応する
+          expect(recipe.ingredients_yomi).toHaveLength(recipe.ingredients.length);
           expect(recipe.ingredients.length).toBeGreaterThan(0);
           for (const ingredient of recipe.ingredients) {
             expect(ingredient).not.toBe('');

@@ -46,7 +46,7 @@ describe('buildIndex（正常系）', () => {
     expect(written).toHaveLength(3);
   });
 
-  it('各レシピは決められた8キーをちょうど持つ', () => {
+  it('各レシピは決められた12キーをちょうど持つ', () => {
     const { written } = build('valid');
 
     for (const recipe of written) {

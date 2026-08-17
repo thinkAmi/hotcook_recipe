@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 検索語を URL に載せるので、外部リンクをたどったときに漏れないようにする(design D-23) -->
+    <meta name="referrer" content="no-referrer" />
+    <title>ホットクック自作レシピ</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h1 class="header__title">ホットクック自作レシピ</h1>
+      <!-- autofocus は付けない。スマホでキーボードが即座に出て一覧が隠れるため -->
+      <input
+        id="query"
+        class="search"
+        type="search"
+        placeholder="料理名や材料で探す（例: さば みそ）"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        enterkeyhint="search"
+        aria-label="レシピを探す"
+      />
+    </header>
+
+    <main class="main">
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <ul id="results" class="results"></ul>
+    </main>
+
+    <dialog id="detail" class="detail" aria-labelledby="detail-title">
+      <div class="detail__bar">
+        <button id="close" class="detail__close" type="button" aria-label="閉じる">閉じる</button>
+      </div>
+      <article class="detail__body">
+        <h2 id="detail-title" class="detail__title"></h2>
+
+        <section id="detail-method" class="detail__section">
+          <h3 class="detail__heading">調理方法</h3>
+          <ul id="detail-method-list" class="detail__list"></ul>
+        </section>
+
+        <section class="detail__section">
+          <h3 class="detail__heading">材料</h3>
+          <ul id="detail-ingredients" class="detail__list"></ul>
+        </section>
+
+        <!-- 手順の見出しは置かない。本文(Markdown)の見出しがそのまま区画の見出しになる。
+             ラベルを置くと、本文の「## 手順」と二重になる -->
+        <section id="detail-steps-section" class="detail__section">
+          <!-- body_html はビルド時に生 HTML を無効化済み。信頼境界はビルドにある(design D-03) -->
+          <div id="detail-steps" class="detail__steps"></div>
+        </section>
+      </article>
+    </dialog>
+
+    <noscript>
+      <p class="status">
+        このページの検索には JavaScript が必要です。有効にしてから読み込み直してください。
+      </p>
+    </noscript>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
