@@ -1,0 +1,7 @@
+node_modules/
+
+# 検索インデックスはビルド生成物。入力(recipes/*.md)からいつでも再生成できる
+/public/recipes.json
+
+# テストのカバレッジ出力
+/coverage/

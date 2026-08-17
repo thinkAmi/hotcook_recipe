@@ -1,2 +1,11 @@
-[tools]
-node = "24.19.0"
+# Node のバージョンは .node-version を単一の真実源(SSoT)にする。
+#
+# mise は既定では .node-version を読まない(idiomatic_version_file_enable_tools の既定値は空)
+# ため、node だけ明示的に有効化する。
+#
+# ここで [tools] に node を書かないのは意図的。書くと .node-version と二重管理になり、
+# 片方だけ更新したときに食い違う。バージョンを変えるときは .node-version を編集すること。
+#
+# 同じ .node-version を GitHub Actions の setup-node(node-version-file) も参照できる。
+[settings]
+idiomatic_version_file_enable_tools = ["node"]

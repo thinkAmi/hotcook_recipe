@@ -1,0 +1,32 @@
+{
+  "name": "hotcook-recipe",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ホットクックの自作レシピを料理名や具材で探せる静的サイト",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.19.0"
+  },
+  "scripts": {
+    "build": "node scripts/build-index.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint scripts tests",
+    "lint:fix": "oxlint --fix scripts tests",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
+  },
+  "dependencies": {
+    "js-yaml": "5.2.3",
+    "markdown-it": "15.0.0"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "4.1.10",
+    "fast-check": "4.9.0",
+    "oxfmt": "0.62.0",
+    "oxlint": "1.77.0",
+    "vitest": "4.1.10"
+  }
+}

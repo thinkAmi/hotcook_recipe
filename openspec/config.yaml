@@ -38,9 +38,11 @@ context: |
   - レシピの不備（必須項目欠落・YAML 破損）はビルドを失敗させて気づけるようにする（fail fast）
   - 構造化データ（JSON・frontmatter・プレーン本文）と「データ化／検索」の層分離を壊さない。
     意味検索・AIチャット・MCP 公開などは将来"足し算"で載せる前提だが、現時点では何も作らない
+  - Node のバージョンは .node-version を単一の真実源とし、mise.toml の [tools] には書かない
+    （二重管理を作らない。CI もこのファイルを参照する）
 
   ## 技術スタック・規約
-  - Node.js（版は mise.toml に従う）、npm＋package-lock.json、ESM
+  - Node.js（版は .node-version に従う）、npm＋package-lock.json、ESM
   - 開発ツール: oxlint（lint）、oxfmt（format）、vitest（テストランナー）、fast-check（プロパティベーステスト）
   - 依存の追加・更新は .npmrc の min-release-age で公開直後の版を掴まない
   - ドキュメント・コード内コメントは日本語。コミットは Conventional Commits
