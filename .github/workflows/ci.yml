@@ -1,0 +1,57 @@
+# 取り込む前の検証。
+#
+# プルリクエストのたびに、手元で完了条件にしているのと同じ4つ(ビルド・テスト・静的検査・
+# 整形の確認)を回す。手元の node が .node-version とずれることが実際にあるため、
+# 「手元では通った」を根拠にしない。
+#
+# デプロイはしない。ブランチ保護もかけないので、赤くてもマージはできる(不備に早く気づく
+# ための情報であって、関門ではない)。公開経路(deploy.yml)でも同じ検証を通すので、
+# main へ直接 push した変更もここを素通りはしない。
+name: CI
+
+on:
+  pull_request:
+
+# 同じプルリクエストに続けて push したとき、古い実行は打ち切る
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# 検証するだけなので読み取りのみ
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # 版は .node-version を単一の真実源にする。ここに版を直接書くと二重管理になる
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+
+      # lockfile どおりに入れる(依存を解決し直さない)
+      - name: Install dependencies
+        run: npm ci
+
+      # 読みの対応表は再生成しない。取得に macOS を要するため Linux では失敗する。
+      # コミット済みの data/yomi.*.json をそのまま使う。
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check

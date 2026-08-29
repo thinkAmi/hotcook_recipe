@@ -1,0 +1,79 @@
+# GitHub Pages への公開。
+#
+# main への push と、必要なときの手動実行で公開する。公開の前に ci.yml と同じ4つの検証を
+# 通し、1つでも失敗すれば公開の手順に進まない。ブランチ保護をかけない運用なので、main へ
+# 直接 push された変更はここが唯一の関門になる。
+#
+# 検証が失敗した場合、Pages は直前に公開された内容をそのまま配信し続けるため、公開サイトは
+# 壊れない。
+#
+# 前提: リポジトリ設定の Pages の Source が「GitHub Actions」になっていること。
+name: Deploy to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 公開に必要な最小限だけを与える
+permissions:
+  contents: read # ソースの取得
+  pages: write # Pages への公開
+  id-token: write # 公開時の身元証明
+
+# 公開は同時に1つだけ。続けて取り込んだときに古い実行が後から完了して
+# 内容が巻き戻ることを防ぐ
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Verify and deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # 版は .node-version を単一の真実源にする(ci.yml と同じ方針)
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # --- ci.yml と同じ検証。ここで失敗すれば以降の公開手順は走らない -------------
+      # 読みの対応表は再生成しない(取得に macOS を要するため)。コミット済みのものを使う。
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      # --- 公開 -------------------------------------------------------------------
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      # 配信するのは public/ だけ。recipes/ や scripts/、tests/、openspec/ は含めない
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: public
+
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
