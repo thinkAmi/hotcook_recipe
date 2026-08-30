@@ -1,0 +1,14 @@
+node_modules/
+
+# 検索インデックスはビルド生成物。入力(recipes/*.md)からいつでも再生成できる
+/public/recipes.json
+
+# data/ は意図的に無視しない。
+#
+# 読みの対応表(data/yomi.*.json)も生成物だが、生成に macOS を要し、かつ誤読を差分で
+# 拾うことが唯一のレビュー手段なのでコミットする。生成物をコミットするかどうかは
+# 「再生成に特定の環境を要するか」「差分が人のレビュー対象になるか」で判断する。
+# 背景は openspec の change recipe-search-site の design.md (D-16) を参照。
+
+# テストのカバレッジ出力
+/coverage/

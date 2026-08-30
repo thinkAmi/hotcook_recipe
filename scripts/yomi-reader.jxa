@@ -1,0 +1,61 @@
+// macOS 組み込みの日本語エンジンで、テキストを語に分けて読みを返す。
+//
+// osascript -l JavaScript で動かす(拡張子を .js にしないのは、Node のコードではなく
+// ObjC ブリッジ経由の別ランタイムだと一目で分かるようにするため。lint/format の対象外)。
+// 呼び出し方は scripts/yomi-reader.mjs を参照。
+//
+// 入力: argv[0] = JSON ファイルのパス(文字列の配列。各要素は空白を含まない断片)
+// 出力: stdout に JSON(入力と同じ長さの配列。各要素は [表層, 読み] の配列)
+
+ObjC.import('Foundation');
+
+// ローマ字表記をひらがなにする。
+// 注意: これは必ず「トークンごと」に呼ぶ。ローマ字のまま連結してから一括変換すると
+// 語の切れ目が失われて壊れる(実測: mirin + oosaji → 「みりのおさじ」)。
+function toHiragana(latin) {
+  var m = $.NSMutableString.stringWithString(latin);
+  $.CFStringTransform(m, $(), $.kCFStringTransformLatinHiragana, false);
+  return ObjC.unwrap(m);
+}
+
+// 1つの断片を語に分け、[表層, 読み] の配列を返す。
+function tokenize(text) {
+  var cf = $(text);
+  var tokenizer = $.CFStringTokenizerCreate(
+    $(),
+    cf,
+    $.CFRangeMake(0, cf.length),
+    $.kCFStringTokenizerUnitWordBoundary,
+    $.NSLocale.localeWithLocaleIdentifier('ja'),
+  );
+
+  var tokens = [];
+  while ($.CFStringTokenizerAdvanceToNextToken(tokenizer) != 0) {
+    var range = $.CFStringTokenizerGetCurrentTokenRange(tokenizer);
+    var start = Number(range.location);
+    var length = Number(range.length);
+    var surface = text.substring(start, start + length);
+
+    var latin = $.CFStringTokenizerCopyCurrentTokenAttribute(
+      tokenizer,
+      $.kCFStringTokenizerAttributeLatinTranscription,
+    );
+    var unwrapped = latin ? ObjC.unwrap(latin) : null;
+    var yomi = unwrapped ? toHiragana(unwrapped) : '';
+
+    tokens.push([surface, yomi]);
+  }
+  return tokens;
+}
+
+function run(argv) {
+  var path = argv[0];
+  var raw = ObjC.unwrap(
+    $.NSString.stringWithContentsOfFileEncodingError($(path), $.NSUTF8StringEncoding, $()),
+  );
+  if (raw === null) {
+    throw new Error('入力ファイルを読めません: ' + path);
+  }
+  var segments = JSON.parse(raw);
+  return JSON.stringify(segments.map(tokenize));
+}
