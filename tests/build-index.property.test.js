@@ -86,6 +86,22 @@ describe('検索インデックスの正規化（不変条件）', () => {
     );
   });
 
+  it('材料は書かれた順のまま保たれる（投入順の保持）', () => {
+    // 材料の並びは投入順を表す(spec「材料の並びは投入順」)。空要素の除去と前後の空白の
+    // 正規化はしても、残った要素の順序は入れ替えない
+    fc.assert(
+      fc.property(recipeEntries, (pairs) => {
+        const { recipes } = buildRecipes(toEntries(pairs));
+        const bySlug = new Map(recipes.map((recipe) => [recipe.id, recipe]));
+
+        pairs.forEach(([data], i) => {
+          const expected = data.ingredients.map((s) => s.trim()).filter((s) => s !== '');
+          expect(bySlug.get(`recipe-${i}`).ingredients).toEqual(expected);
+        });
+      }),
+    );
+  });
+
   it('常に料理名の昇順に並ぶ', () => {
     fc.assert(
       fc.property(recipeEntries, (pairs) => {
