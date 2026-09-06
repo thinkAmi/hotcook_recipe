@@ -158,3 +158,8 @@ openspec/    仕様と設計の記録（spec 駆動で開発しています）
 ```
 
 なぜその作りにしたかは `openspec/` の各 change に記録しています。
+
+
+## 関係するブログ
+
+- [GitHub Pagesにて、ホットクックのレシピについて管理するサイトをホストしてみた - メモ的な思考的な](https://thinkami.hatenablog.com/entry/2026/09/06/213134)
